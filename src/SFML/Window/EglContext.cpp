@@ -248,7 +248,8 @@ void EglContext::setVerticalSyncEnabled(bool enabled)
 void EglContext::createContext(EglContext* shared)
 {
     const EGLint contextVersion[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 1,
+        EGL_CONTEXT_MAJOR_VERSION, 2,
+        EGL_CONTEXT_MINOR_VERSION,0,
         EGL_NONE
     };
 

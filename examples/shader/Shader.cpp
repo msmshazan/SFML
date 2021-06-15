@@ -31,7 +31,7 @@ public:
         // Load the shader
         if (!m_shader.loadFromFile("resources/pixelate.frag", sf::Shader::Fragment))
             return false;
-        m_shader.setUniform("texture", sf::Shader::CurrentTexture);
+        m_shader.setUniform("u_Texture", sf::Shader::CurrentTexture);
 
         return true;
     }
@@ -215,7 +215,7 @@ public:
         // Load the shader
         if (!m_shader.loadFromFile("resources/edge.frag", sf::Shader::Fragment))
             return false;
-        m_shader.setUniform("texture", sf::Shader::CurrentTexture);
+        m_shader.setUniform("u_Texture", sf::Shader::CurrentTexture);
 
         return true;
     }
@@ -293,7 +293,7 @@ public:
         // Load the shader
         if (!m_shader.loadFromFile("resources/billboard.vert", "resources/billboard.geom", "resources/billboard.frag"))
             return false;
-        m_shader.setUniform("texture", sf::Shader::CurrentTexture);
+        m_shader.setUniform("u_Texture", sf::Shader::CurrentTexture);
 
         // Set the render resolution (used for proper scaling)
         m_shader.setUniform("resolution", sf::Vector2f(800, 600));

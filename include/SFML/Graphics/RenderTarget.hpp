@@ -38,6 +38,7 @@
 #include <SFML/Graphics/PrimitiveType.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/System/NonCopyable.hpp>
+#include <SFML/Graphics/Shader.hpp>
 
 
 namespace sf
@@ -429,7 +430,7 @@ private:
     /// \param shader Shader to apply
     ///
     ////////////////////////////////////////////////////////////
-    void applyShader(const Shader* shader);
+    void applyShader(Shader* shader);
 
     ////////////////////////////////////////////////////////////
     /// \brief Setup environment for drawing
@@ -479,10 +480,12 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    View        m_defaultView; //!< Default view
-    View        m_view;        //!< Current view
-    StatesCache m_cache;       //!< Render states cache
-    Uint64      m_id;          //!< Unique number that identifies the RenderTarget
+    Shader      m_defaultShader;      //!< Default shader
+    Shader      m_defaultNoTexShader; //!< Default No Texture shader
+    View        m_defaultView;        //!< Default view
+    View        m_view;               //!< Current view
+    StatesCache m_cache;              //!< Render states cache
+    Uint64      m_id;                 //!< Unique number that identifies the RenderTarget
 };
 
 } // namespace sf

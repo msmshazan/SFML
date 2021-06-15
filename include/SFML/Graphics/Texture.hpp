@@ -613,9 +613,11 @@ private:
     ////////////////////////////////////////////////////////////
     void invalidateMipmap();
 
+
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
+    //float        m_matrix[16];    //!< transform matrix
     Vector2u     m_size;          //!< Public texture size
     Vector2u     m_actualSize;    //!< Actual texture size (can be greater than public size because of padding)
     unsigned int m_texture;       //!< Internal texture identifier

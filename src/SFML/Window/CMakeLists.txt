@@ -63,8 +63,6 @@ if(SFML_OS_WINDOWS)
         ${SRCROOT}/Win32/CursorImpl.cpp
         ${SRCROOT}/Win32/ClipboardImpl.hpp
         ${SRCROOT}/Win32/ClipboardImpl.cpp
-        ${SRCROOT}/Win32/WglContext.cpp
-        ${SRCROOT}/Win32/WglContext.hpp
         ${SRCROOT}/Win32/InputImpl.cpp
         ${SRCROOT}/Win32/InputImpl.hpp
         ${SRCROOT}/Win32/JoystickImpl.cpp
@@ -77,6 +75,11 @@ if(SFML_OS_WINDOWS)
         ${SRCROOT}/Win32/WindowImplWin32.cpp
         ${SRCROOT}/Win32/WindowImplWin32.hpp
     )
+    if(!SFML_OPENGL_ES)
+    set(PLATFORM_SRC ${PLATFORM_SRC}
+        ${SRCROOT}/Win32/WglContext.cpp
+        ${SRCROOT}/Win32/WglContext.hpp)
+    endif()
     source_group("windows" FILES ${PLATFORM_SRC})
 
     # make sure that we use the Unicode version of the Win API functions
@@ -273,8 +276,18 @@ elseif(SFML_OS_ANDROID)
     target_link_libraries(sfml-window PRIVATE EGL)
     target_link_libraries(sfml-window PRIVATE GLES)
 else()
+    if(SFML_OPENGL_ES)
+    add_library(libEGL SHARED IMPORTED)
+    set_property(TARGET libEGL PROPERTY IMPORTED_IMPLIB ${CMAKE_LIBRARY_PATH}/libEGL.lib)
+    add_library(libGLESv1_CM SHARED IMPORTED)
+    set_property(TARGET libGLESv1_CM PROPERTY IMPORTED_IMPLIB ${CMAKE_LIBRARY_PATH}/libGLESv1_CM.lib)
+    add_library(libGLESv2 SHARED IMPORTED)
+    set_property(TARGET libGLESv2 PROPERTY IMPORTED_IMPLIB ${CMAKE_LIBRARY_PATH}/libGLESv2.lib)
+    target_link_libraries(sfml-window PRIVATE libEGL libGLESv1_CM libGLESv2)
+    else()
     sfml_find_package(OpenGL INCLUDE "OPENGL_INCLUDE_DIR" LINK "OPENGL_gl_LIBRARY")
     target_link_libraries(sfml-window PRIVATE OpenGL)
+    endif()
 endif()
 
 if(SFML_OS_WINDOWS AND NOT SFML_COMPILER_MSVC)

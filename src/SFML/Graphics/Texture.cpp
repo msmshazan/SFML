@@ -296,6 +296,7 @@ bool Texture::loadFromImage(const Image& image, const IntRect& area)
             // in all contexts immediately (solves problems in multi-threaded apps)
             glCheck(glFlush());
 
+
             return true;
         }
         else
@@ -424,9 +425,11 @@ void Texture::update(const Uint8* pixels, unsigned int width, unsigned int heigh
         m_pixelsFlipped = false;
         m_cacheId = getUniqueId();
 
+       
         // Force an OpenGL flush, so that the texture data will appear updated
-        // in all contexts immediately (solves problems in multi-threaded apps)
+       // in all contexts immediately (solves problems in multi-threaded apps)
         glCheck(glFlush());
+
     }
 }
 
@@ -448,7 +451,6 @@ void Texture::update(const Texture& texture, unsigned int x, unsigned int y)
     if (!m_texture || !texture.m_texture)
         return;
 
-#ifndef SFML_OPENGL_ES
 
     {
         TransientContextLock lock;
@@ -534,7 +536,6 @@ void Texture::update(const Texture& texture, unsigned int x, unsigned int y)
         return;
     }
 
-#endif // SFML_OPENGL_ES
 
     update(texture.copyToImage(), x, y);
 }
@@ -586,6 +587,7 @@ void Texture::update(const Window& window, unsigned int x, unsigned int y)
         // Force an OpenGL flush, so that the texture will appear updated
         // in all contexts immediately (solves problems in multi-threaded apps)
         glCheck(glFlush());
+
     }
 }
 
@@ -763,19 +765,24 @@ void Texture::bind(const Texture* texture, CoordinateType coordinateType)
                 matrix[5] = -matrix[5];
                 matrix[13] = static_cast<float>(texture->m_size.y) / texture->m_actualSize.y;
             }
-
+#ifndef SFML_OPENGL_ES
+            glCheck(glLoadMatrixf(matrix));
             // Load the matrix
             glCheck(glMatrixMode(GL_TEXTURE));
-            glCheck(glLoadMatrixf(matrix));
-
             // Go back to model-view mode (sf::RenderTarget relies on it)
             glCheck(glMatrixMode(GL_MODELVIEW));
+#else
+
+#endif
         }
     }
     else
     {
         // Bind no texture
         glCheck(glBindTexture(GL_TEXTURE_2D, 0));
+#ifdef SFML_OPENGL_ES
+        // No need to empty matrix values
+#else
 
         // Reset the texture matrix
         glCheck(glMatrixMode(GL_TEXTURE));
@@ -783,6 +790,9 @@ void Texture::bind(const Texture* texture, CoordinateType coordinateType)
 
         // Go back to model-view mode (sf::RenderTarget relies on it)
         glCheck(glMatrixMode(GL_MODELVIEW));
+#endif // SFML_OPENGL_ES
+
+
     }
 }
 

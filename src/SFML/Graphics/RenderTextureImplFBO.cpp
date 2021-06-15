@@ -193,11 +193,8 @@ unsigned int RenderTextureImplFBO::getMaximumAntialiasingLevel()
 
     GLint samples = 0;
 
-#ifndef SFML_OPENGL_ES
-
     glCheck(glGetIntegerv(GLEXT_GL_MAX_SAMPLES, &samples));
 
-#endif
 
     return static_cast<unsigned int>(samples);
 }
@@ -231,7 +228,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
 
         m_sRgb = settings.sRgbCapable && GL_EXT_texture_sRGB;
 
-#ifndef SFML_OPENGL_ES
 
         // Check if the requested anti-aliasing level is supported
         if (settings.antialiasingLevel)
@@ -247,7 +243,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
             }
         }
 
-#endif
 
 
         if (!settings.antialiasingLevel)
@@ -256,7 +251,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
             if (settings.stencilBits)
             {
 
-#ifndef SFML_OPENGL_ES
 
                 GLuint depthStencil = 0;
                 glCheck(GLEXT_glGenRenderbuffers(1, &depthStencil));
@@ -268,13 +262,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
                 }
                 glCheck(GLEXT_glBindRenderbuffer(GLEXT_GL_RENDERBUFFER, m_depthStencilBuffer));
                 glCheck(GLEXT_glRenderbufferStorage(GLEXT_GL_RENDERBUFFER, GLEXT_GL_DEPTH24_STENCIL8, width, height));
-
-#else
-
-                err() << "Impossible to create render texture (failed to create the attached depth/stencil buffer)" << std::endl;
-                return false;
-
-#endif // SFML_OPENGL_ES
 
                 m_stencil = true;
 
@@ -296,7 +283,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
         else
         {
 
-#ifndef SFML_OPENGL_ES
 
             // Create the multisample color buffer
             GLuint color = 0;
@@ -340,12 +326,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
                 glCheck(GLEXT_glRenderbufferStorageMultisample(GLEXT_GL_RENDERBUFFER, settings.antialiasingLevel, GLEXT_GL_DEPTH_COMPONENT, width, height));
             }
 
-#else
-
-            err() << "Impossible to create render texture (failed to create the multisample render buffers)" << std::endl;
-            return false;
-
-#endif // SFML_OPENGL_ES
 
             m_multisample = true;
 
@@ -359,7 +339,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
     if (!Context::getActiveContextId())
         return true;
 
-#ifndef SFML_OPENGL_ES
 
     // Save the current bindings so we can restore them after we are done
     GLint readFramebuffer = 0;
@@ -377,22 +356,6 @@ bool RenderTextureImplFBO::create(unsigned int width, unsigned int height, unsig
         return true;
     }
 
-#else
-
-    // Save the current binding so we can restore them after we are done
-    GLint frameBuffer = 0;
-
-    glCheck(glGetIntegerv(GLEXT_GL_FRAMEBUFFER_BINDING, &frameBuffer));
-
-    if (createFrameBuffer())
-    {
-        // Restore previously bound framebuffer
-        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_FRAMEBUFFER, frameBuffer));
-
-        return true;
-    }
-
-#endif
 
     return false;
 }
@@ -417,14 +380,11 @@ bool RenderTextureImplFBO::createFrameBuffer()
     {
         glCheck(GLEXT_glFramebufferRenderbuffer(GLEXT_GL_FRAMEBUFFER, GLEXT_GL_DEPTH_ATTACHMENT, GLEXT_GL_RENDERBUFFER, m_depthStencilBuffer));
 
-#ifndef SFML_OPENGL_ES
 
         if (m_stencil)
         {
             glCheck(GLEXT_glFramebufferRenderbuffer(GLEXT_GL_FRAMEBUFFER, GLEXT_GL_STENCIL_ATTACHMENT, GLEXT_GL_RENDERBUFFER, m_depthStencilBuffer));
         }
-
-#endif
 
     }
 
@@ -448,8 +408,6 @@ bool RenderTextureImplFBO::createFrameBuffer()
         // Insert the FBO into our map
         m_frameBuffers.insert(std::make_pair(Context::getActiveContextId(), static_cast<unsigned int>(frameBuffer)));
     }
-
-#ifndef SFML_OPENGL_ES
 
     if (m_multisample)
     {
@@ -496,8 +454,6 @@ bool RenderTextureImplFBO::createFrameBuffer()
             m_multisampleFrameBuffers.insert(std::make_pair(Context::getActiveContextId(), static_cast<unsigned int>(multisampleFrameBuffer)));
         }
     }
-
-#endif
 
     return true;
 }
@@ -584,7 +540,6 @@ void RenderTextureImplFBO::updateTexture(unsigned int)
     // from our FBO with multisample renderbuffer attachments
     // to our FBO to which our target texture is attached
 
-#ifndef SFML_OPENGL_ES
 
     // In case of multisampling, make sure both FBOs
     // are already available within the current context
@@ -606,7 +561,6 @@ void RenderTextureImplFBO::updateTexture(unsigned int)
         }
     }
 
-#endif // SFML_OPENGL_ES
 
 }
 

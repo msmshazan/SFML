@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#define SF_GLAD_GL_IMPLEMENTATION
+#define GLAD_GL_IMPLEMENTATION
 #include <SFML/Graphics/GLExtensions.hpp>
 #include <SFML/Window/Context.hpp>
 #include <SFML/System/Err.hpp>
@@ -53,6 +53,7 @@ void ensureExtensionsInit()
 
 #ifdef SFML_OPENGL_ES
         gladLoadGLES1(reinterpret_cast<GLADloadfunc>(sf::Context::getFunction));
+        gladLoadGLES2(reinterpret_cast<GLADloadfunc>(sf::Context::getFunction));
 #else
         gladLoadGL(reinterpret_cast<GLADloadfunc>(sf::Context::getFunction));
 #endif
