@@ -1220,14 +1220,49 @@ namespace sf
             err() << "Failed to open shader file \"" << filename << "\"" << std::endl;
             return false;
         }
+        //default Shaders
+        auto vertexShader = R"vert(
 
+    precision mediump float;
+    uniform mat4 u_TextureMatrix;
+    uniform mat4 u_ModelViewMatrix;
+    uniform mat4 u_ProjectionMatrix;
+    attribute vec2 a_TexCoord;
+    attribute vec2 a_Vertex;
+    attribute vec4 a_Color;
+    varying vec4 v_Color;
+    varying vec2 v_TexCoord;
+
+    void main()
+    {
+        gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(a_Vertex,0.0,1.0);
+        v_Color = a_Color;
+        v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord,1.0,1.0)).xy;
+    }
+    )vert";
+        auto fragmentShader = R"frag(
+    #version 100
+    precision mediump float;
+
+    //uniform mat4 u_ColorMatrix;
+    uniform sampler2D u_Texture;
+    varying vec2 v_TexCoord;
+    varying vec4 v_Color;
+
+    void main()
+    {
+        //vec4 Color = u_ColorMatrix * v_Color;
+        gl_FragColor = texture2D(u_Texture, v_TexCoord)*v_Color;
+    }
+    )frag";
+        
         // Compile the shader program
         if (type == Vertex)
-            return compile(&shader[0], NULL, NULL);
+            return compile(&shader[0], NULL, fragmentShader);
         else if (type == Geometry)
             return compile(NULL, &shader[0], NULL);
         else
-            return compile(NULL, NULL, &shader[0]);
+            return compile(vertexShader, NULL, &shader[0]);
     }
 
 
@@ -1785,8 +1820,11 @@ namespace sf
 
             // Make sure that extensions are initialized
             sf::priv::ensureExtensionsInit();
-
+#ifdef SFML_OPENGL_ES
+            available = isAvailable() && (GLEXT_geometry_shader4 );
+#else
             available = isAvailable() && (GLEXT_geometry_shader4 || GLEXT_GL_VERSION_3_2);
+#endif
         }
 
         return available;
@@ -1922,7 +1960,7 @@ namespace sf
         if (success == GL_FALSE)
         {
             char log[1024];
-            glCheck(GLEXT_glGetShaderInfoLog(shaderProgram, sizeof(log), 0, log));
+            glCheck(GLEXT_glGetProgramInfoLog(shaderProgram, sizeof(log), 0, log));
             err() << "Failed to link shader:" << std::endl
                 << log << std::endl;
             glCheck(GLEXT_glDeleteProgram(shaderProgram));

@@ -205,7 +205,7 @@
 
 
     // Core since 3.2 - EXT_geometry_shader4
-    #define GLEXT_geometry_shader4                    GLAD_GL_EXT_geometry_shader4
+    #define GLEXT_geometry_shader4                    GLAD_GL_EXT_geometry_shader
     #define GLEXT_GL_GEOMETRY_SHADER                  GL_GEOMETRY_SHADER_EXT
 #else
 
