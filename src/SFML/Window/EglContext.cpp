@@ -39,7 +39,7 @@
     #include <X11/Xlib.h>
 #endif
 
-#define SF_GLAD_EGL_IMPLEMENTATION
+#define GLAD_EGL_IMPLEMENTATION
 #include <glad/egl.h>
 
 namespace
@@ -60,7 +60,20 @@ namespace
 
         if (display == EGL_NO_DISPLAY)
         {
+#ifdef SFML_OPENGL_ES
+            const EGLint EGL_PLATFORM_ANGLE_ANGLE = 0x3202;
+            const EGLint EGL_PLATFORM_ANGLE_TYPE_ANGLE = 0x3203;
+            const EGLint EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE = 0x3450;
+            const EGLint EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE = 0x3209;
+            const EGLint EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE = 0x320A;
+            const EGLint EGL_PLATFORM_ANGLE_DEBUG_LAYERS_ENABLED = 0x3451;
+            const EGLint attribs[] = { EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE, EGL_NONE };
+            eglCheck(display = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY, attribs));
+
+#else
             eglCheck(display = eglGetDisplay(EGL_DEFAULT_DISPLAY));
+#endif // SFML_OPENGL_ES
+
             eglCheck(eglInitialize(display, NULL, NULL));
         }
 
