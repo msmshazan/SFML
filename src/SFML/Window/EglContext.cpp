@@ -356,8 +356,8 @@ void EglContext::updateSettings()
 
     m_settings.antialiasingLevel = tmp;
 
-    m_settings.majorVersion = 1;
-    m_settings.minorVersion = 1;
+    m_settings.majorVersion = 2;
+    m_settings.minorVersion = 0;
     m_settings.attributeFlags = ContextSettings::Default;
 }
 
