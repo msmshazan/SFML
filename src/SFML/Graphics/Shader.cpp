@@ -1209,19 +1209,8 @@ namespace sf
             glCheck(GLEXT_glDeleteProgram(castToGlHandle(m_shaderProgram)));
     }
 
-
-    ////////////////////////////////////////////////////////////
-    bool Shader::loadFromFile(const std::string& filename, Type type)
-    {
-        // Read the file
-        std::vector<char> shader;
-        if (!getFileContents(filename, shader))
-        {
-            err() << "Failed to open shader file \"" << filename << "\"" << std::endl;
-            return false;
-        }
-        //default Shaders
-        auto vertexShader = R"vert(
+    //default Shaders
+    auto vertexShader = R"vert(
 
     precision mediump float;
     uniform mat4 u_TextureMatrix;
@@ -1240,7 +1229,7 @@ namespace sf
         v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord,1.0,1.0)).xy;
     }
     )vert";
-        auto fragmentShader = R"frag(
+    auto fragmentShader = R"frag(
     #version 100
     precision mediump float;
 
@@ -1255,6 +1244,17 @@ namespace sf
         gl_FragColor = texture2D(u_Texture, v_TexCoord)*v_Color;
     }
     )frag";
+
+    ////////////////////////////////////////////////////////////
+    bool Shader::loadFromFile(const std::string& filename, Type type)
+    {
+        // Read the file
+        std::vector<char> shader;
+        if (!getFileContents(filename, shader))
+        {
+            err() << "Failed to open shader file \"" << filename << "\"" << std::endl;
+            return false;
+        }
         
         // Compile the shader program
         if (type == Vertex)
@@ -1326,12 +1326,13 @@ namespace sf
     bool Shader::loadFromMemory(const std::string& shader, Type type)
     {
         // Compile the shader program
+
         if (type == Vertex)
-            return compile(shader.c_str(), NULL, NULL);
+            return compile(shader.c_str(), NULL, fragmentShader);
         else if (type == Geometry)
             return compile(NULL, shader.c_str(), NULL);
         else
-            return compile(NULL, NULL, shader.c_str());
+            return compile(vertexShader, NULL, shader.c_str());
     }
 
 
