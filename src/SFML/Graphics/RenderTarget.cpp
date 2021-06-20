@@ -896,7 +896,7 @@ void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
         // Since vertices are transformed, we must use an identity transform to render them
         if (!m_cache.enable || !m_cache.useVertexCache) {
 #ifdef SFML_OPENGL_ES
-            Glsl::Mat4 matrix = Glsl::Mat4::Matrix(Transform::Identity.getMatrix());
+            Glsl::Mat4 matrix = Glsl::Mat4(Transform::Identity.getMatrix());
             if (states.shader) {
                 ((sf::Shader *)states.shader)->setUniform("u_ModelViewMatrix", matrix);
             }
@@ -919,7 +919,7 @@ void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
     else
     {
 #ifdef SFML_OPENGL_ES
-        Glsl::Mat4 matrix = Glsl::Mat4::Matrix(states.transform.getMatrix());
+        Glsl::Mat4 matrix = Glsl::Mat4(states.transform.getMatrix());
         if (states.shader) {
             ((sf::Shader*)states.shader)->setUniform("u_ModelViewMatrix", matrix);
         }
@@ -939,7 +939,7 @@ void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
     }
 
 #ifdef SFML_OPENGL_ES
-    Glsl::Mat4 matrix = Glsl::Mat4::Matrix(m_view.getTransform().getMatrix());
+    Glsl::Mat4 matrix = Glsl::Mat4(m_view.getTransform().getMatrix());
     if (states.shader) {
         ((sf::Shader*)states.shader)->setUniform("u_ProjectionMatrix", matrix);
     }
