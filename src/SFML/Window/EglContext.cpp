@@ -67,7 +67,8 @@ namespace
             const EGLint EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE = 0x3209;
             const EGLint EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE = 0x320A;
             const EGLint EGL_PLATFORM_ANGLE_DEBUG_LAYERS_ENABLED = 0x3451;
-            const EGLint attribs[] = { EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE, EGL_NONE };
+
+           const EGLint attribs[] = { EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE, EGL_NONE };
             eglCheck(display = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY, attribs));
 
 #else
@@ -89,12 +90,19 @@ namespace
         {
             initialized = true;
 
+#ifdef SFML_SYSTEM_WINDOWS
+            eglLoadAngle();
+
+#else
+
             // We don't check the return value since the extension
-            // flags are cleared even if loading fails
+           // flags are cleared even if loading fails
             gladLoaderLoadEGL(EGL_NO_DISPLAY);
 
             // Continue loading with a display
             gladLoaderLoadEGL(getInitializedDisplay());
+#endif
+           
         }
     }
 }

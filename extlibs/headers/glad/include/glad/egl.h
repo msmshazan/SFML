@@ -1575,6 +1575,97 @@ extern "C" {
         }
     }
 
+    GLADapiproc loadEGLPtr(const char* name) {
+        return glad_dlsym_handle(_egl_handle, name);
+    }
+
+    void LoadEGL(PFNEGLGETPROCADDRESSPROC loadProc)
+    {
+        eglChooseConfig = reinterpret_cast<PFNEGLCHOOSECONFIGPROC>(loadProc("eglChooseConfig"));
+        eglCopyBuffers = reinterpret_cast<PFNEGLCOPYBUFFERSPROC>(loadProc("eglCopyBuffers"));
+        eglCreateContext = reinterpret_cast<PFNEGLCREATECONTEXTPROC>(loadProc("eglCreateContext"));
+        eglCreatePbufferSurface =
+            reinterpret_cast<PFNEGLCREATEPBUFFERSURFACEPROC>(loadProc("eglCreatePbufferSurface"));
+        eglCreatePixmapSurface =
+            reinterpret_cast<PFNEGLCREATEPIXMAPSURFACEPROC>(loadProc("eglCreatePixmapSurface"));
+        eglCreateWindowSurface =
+            reinterpret_cast<PFNEGLCREATEWINDOWSURFACEPROC>(loadProc("eglCreateWindowSurface"));
+        eglDestroyContext = reinterpret_cast<PFNEGLDESTROYCONTEXTPROC>(loadProc("eglDestroyContext"));
+        eglDestroySurface = reinterpret_cast<PFNEGLDESTROYSURFACEPROC>(loadProc("eglDestroySurface"));
+        eglGetConfigAttrib =
+            reinterpret_cast<PFNEGLGETCONFIGATTRIBPROC>(loadProc("eglGetConfigAttrib"));
+        eglGetConfigs = reinterpret_cast<PFNEGLGETCONFIGSPROC>(loadProc("eglGetConfigs"));
+        eglGetCurrentDisplay =
+            reinterpret_cast<PFNEGLGETCURRENTDISPLAYPROC>(loadProc("eglGetCurrentDisplay"));
+        eglGetCurrentSurface =
+            reinterpret_cast<PFNEGLGETCURRENTSURFACEPROC>(loadProc("eglGetCurrentSurface"));
+        eglGetDisplay = reinterpret_cast<PFNEGLGETDISPLAYPROC>(loadProc("eglGetDisplay"));
+        eglGetError = reinterpret_cast<PFNEGLGETERRORPROC>(loadProc("eglGetError"));
+        eglGetProcAddress = reinterpret_cast<PFNEGLGETPROCADDRESSPROC>(loadProc("eglGetProcAddress"));
+        eglInitialize = reinterpret_cast<PFNEGLINITIALIZEPROC>(loadProc("eglInitialize"));
+        eglMakeCurrent = reinterpret_cast<PFNEGLMAKECURRENTPROC>(loadProc("eglMakeCurrent"));
+        eglQueryContext = reinterpret_cast<PFNEGLQUERYCONTEXTPROC>(loadProc("eglQueryContext"));
+        eglQueryString = reinterpret_cast<PFNEGLQUERYSTRINGPROC>(loadProc("eglQueryString"));
+        eglQuerySurface = reinterpret_cast<PFNEGLQUERYSURFACEPROC>(loadProc("eglQuerySurface"));
+        eglSwapBuffers = reinterpret_cast<PFNEGLSWAPBUFFERSPROC>(loadProc("eglSwapBuffers"));
+        eglTerminate = reinterpret_cast<PFNEGLTERMINATEPROC>(loadProc("eglTerminate"));
+        eglWaitGL = reinterpret_cast<PFNEGLWAITGLPROC>(loadProc("eglWaitGL"));
+        eglWaitNative = reinterpret_cast<PFNEGLWAITNATIVEPROC>(loadProc("eglWaitNative"));
+        eglBindTexImage = reinterpret_cast<PFNEGLBINDTEXIMAGEPROC>(loadProc("eglBindTexImage"));
+        eglReleaseTexImage =
+            reinterpret_cast<PFNEGLRELEASETEXIMAGEPROC>(loadProc("eglReleaseTexImage"));
+        eglSurfaceAttrib = reinterpret_cast<PFNEGLSURFACEATTRIBPROC>(loadProc("eglSurfaceAttrib"));
+        eglSwapInterval = reinterpret_cast<PFNEGLSWAPINTERVALPROC>(loadProc("eglSwapInterval"));
+        eglBindAPI = reinterpret_cast<PFNEGLBINDAPIPROC>(loadProc("eglBindAPI"));
+        eglQueryAPI = reinterpret_cast<PFNEGLQUERYAPIPROC>(loadProc("eglQueryAPI"));
+        eglCreatePbufferFromClientBuffer = reinterpret_cast<PFNEGLCREATEPBUFFERFROMCLIENTBUFFERPROC>(
+            loadProc("eglCreatePbufferFromClientBuffer"));
+        eglReleaseThread = reinterpret_cast<PFNEGLRELEASETHREADPROC>(loadProc("eglReleaseThread"));
+        eglWaitClient = reinterpret_cast<PFNEGLWAITCLIENTPROC>(loadProc("eglWaitClient"));
+        eglGetCurrentContext =
+            reinterpret_cast<PFNEGLGETCURRENTCONTEXTPROC>(loadProc("eglGetCurrentContext"));
+        eglCreateSync = reinterpret_cast<PFNEGLCREATESYNCPROC>(loadProc("eglCreateSync"));
+        eglDestroySync = reinterpret_cast<PFNEGLDESTROYSYNCPROC>(loadProc("eglDestroySync"));
+        eglClientWaitSync = reinterpret_cast<PFNEGLCLIENTWAITSYNCPROC>(loadProc("eglClientWaitSync"));
+        eglGetSyncAttrib = reinterpret_cast<PFNEGLGETSYNCATTRIBPROC>(loadProc("eglGetSyncAttrib"));
+        eglCreateImage = reinterpret_cast<PFNEGLCREATEIMAGEPROC>(loadProc("eglCreateImage"));
+        eglDestroyImage = reinterpret_cast<PFNEGLDESTROYIMAGEPROC>(loadProc("eglDestroyImage"));
+        eglGetPlatformDisplay =
+            reinterpret_cast<PFNEGLGETPLATFORMDISPLAYPROC>(loadProc("eglGetPlatformDisplay"));
+        eglCreatePlatformWindowSurface = reinterpret_cast<PFNEGLCREATEPLATFORMWINDOWSURFACEPROC>(
+            loadProc("eglCreatePlatformWindowSurface"));
+        eglCreatePlatformPixmapSurface = reinterpret_cast<PFNEGLCREATEPLATFORMPIXMAPSURFACEPROC>(
+            loadProc("eglCreatePlatformPixmapSurface"));
+        eglWaitSync = reinterpret_cast<PFNEGLWAITSYNCPROC>(loadProc("eglWaitSync"));
+        eglCreatePlatformPixmapSurfaceEXT =
+            reinterpret_cast<PFNEGLCREATEPLATFORMPIXMAPSURFACEEXTPROC>(
+                loadProc("eglCreatePlatformPixmapSurfaceEXT"));
+        eglCreatePlatformWindowSurfaceEXT =
+            reinterpret_cast<PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC>(
+                loadProc("eglCreatePlatformWindowSurfaceEXT"));
+        eglGetPlatformDisplayEXT =
+            reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(loadProc("eglGetPlatformDisplayEXT"));
+        eglClientWaitSyncKHR =
+            reinterpret_cast<PFNEGLCLIENTWAITSYNCKHRPROC>(loadProc("eglClientWaitSyncKHR"));
+        eglCreateSyncKHR = reinterpret_cast<PFNEGLCREATESYNCKHRPROC>(loadProc("eglCreateSyncKHR"));
+        eglDestroySyncKHR = reinterpret_cast<PFNEGLDESTROYSYNCKHRPROC>(loadProc("eglDestroySyncKHR"));
+        eglGetSyncAttribKHR =
+            reinterpret_cast<PFNEGLGETSYNCATTRIBKHRPROC>(loadProc("eglGetSyncAttribKHR"));
+        eglCreateImageKHR = reinterpret_cast<PFNEGLCREATEIMAGEKHRPROC>(loadProc("eglCreateImageKHR"));
+        eglDestroyImageKHR =
+            reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(loadProc("eglDestroyImageKHR"));
+        eglSignalSyncKHR = reinterpret_cast<PFNEGLSIGNALSYNCKHRPROC>(loadProc("eglSignalSyncKHR"));
+    }
+
+    void eglLoadAngle() {
+        void* handle = glad_egl_dlopen_handle();
+        PFNEGLGETPROCADDRESSPROC getProc = (PFNEGLGETPROCADDRESSPROC)glad_dlsym_handle(handle, "eglGetProcAddress");
+        LoadEGL(getProc);
+        gladLoaderUnloadEGL();
+    }
+
+
+
 #endif /* GLAD_EGL */
 
 #ifdef __cplusplus

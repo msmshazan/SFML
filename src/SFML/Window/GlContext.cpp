@@ -721,6 +721,13 @@ void GlContext::initialize(const ContextSettings& requestedSettings)
     glGetIntegervFunc(GL_MAJOR_VERSION, &majorVersion);
     glGetIntegervFunc(GL_MINOR_VERSION, &minorVersion);
 
+#ifdef SFML_OPENGL_ES
+    majorVersion = 2;
+    minorVersion = 0;
+
+#endif // SFML_OPENGL_ES
+
+
     if (glGetErrorFunc() != GL_INVALID_ENUM)
     {
         m_settings.majorVersion = static_cast<unsigned int>(majorVersion);
