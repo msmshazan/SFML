@@ -86,7 +86,7 @@
 
 #endif
 
-#if defined(SFML_SYSTEM_WINDOWS)
+#if defined(SFML_SYSTEM_WINDOWS) 
 
     typedef void (APIENTRY *glEnableFuncType)(GLenum);
     typedef GLenum (APIENTRY *glGetErrorFuncType)();

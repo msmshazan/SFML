@@ -1656,16 +1656,6 @@ extern "C" {
             reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(loadProc("eglDestroyImageKHR"));
         eglSignalSyncKHR = reinterpret_cast<PFNEGLSIGNALSYNCKHRPROC>(loadProc("eglSignalSyncKHR"));
     }
-
-    void eglLoadAngle() {
-        void* handle = glad_egl_dlopen_handle();
-        PFNEGLGETPROCADDRESSPROC getProc = (PFNEGLGETPROCADDRESSPROC)glad_dlsym_handle(handle, "eglGetProcAddress");
-        LoadEGL(getProc);
-        gladLoaderUnloadEGL();
-    }
-
-
-
 #endif /* GLAD_EGL */
 
 #ifdef __cplusplus

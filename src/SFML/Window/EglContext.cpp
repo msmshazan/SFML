@@ -41,9 +41,19 @@
 
 #define GLAD_EGL_IMPLEMENTATION
 #include <glad/egl.h>
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
 
 namespace
 {
+    void LoadAngle() {
+        void* handle = glad_egl_dlopen_handle();
+        PFNEGLGETPROCADDRESSPROC getProc = (PFNEGLGETPROCADDRESSPROC)glad_dlsym_handle(handle, "eglGetProcAddress");
+        LoadEGL(getProc);
+        LoadGLES(getProc);
+        gladLoaderUnloadEGL();
+    }
+
     EGLDisplay getInitializedDisplay()
     {
 #if defined(SFML_SYSTEM_ANDROID)
@@ -60,7 +70,7 @@ namespace
 
         if (display == EGL_NO_DISPLAY)
         {
-#ifdef SFML_OPENGL_ES
+#if defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
             const EGLint EGL_PLATFORM_ANGLE_ANGLE = 0x3202;
             const EGLint EGL_PLATFORM_ANGLE_TYPE_ANGLE = 0x3203;
             const EGLint EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE = 0x3450;
@@ -73,7 +83,7 @@ namespace
 
 #else
             eglCheck(display = eglGetDisplay(EGL_DEFAULT_DISPLAY));
-#endif // SFML_OPENGL_ES
+#endif // defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
 
             eglCheck(eglInitialize(display, NULL, NULL));
         }
@@ -90,9 +100,10 @@ namespace
         {
             initialized = true;
 
-#ifdef SFML_SYSTEM_WINDOWS
-            eglLoadAngle();
-
+#if defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
+            // Load both EGL and GLES functions also because ANGLE allows it some stuff breaks if not 
+            LoadAngle();
+            getInitializedDisplay(); // Init default display too
 #else
 
             // We don't check the return value since the extension
@@ -101,7 +112,7 @@ namespace
 
             // Continue loading with a display
             gladLoaderLoadEGL(getInitializedDisplay());
-#endif
+#endif // defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
            
         }
     }
