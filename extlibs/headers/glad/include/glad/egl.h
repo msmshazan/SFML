@@ -1575,10 +1575,6 @@ extern "C" {
         }
     }
 
-    GLADapiproc loadEGLPtr(const char* name) {
-        return glad_dlsym_handle(_egl_handle, name);
-    }
-
     void LoadEGL(PFNEGLGETPROCADDRESSPROC loadProc)
     {
         eglChooseConfig = reinterpret_cast<PFNEGLCHOOSECONFIGPROC>(loadProc("eglChooseConfig"));

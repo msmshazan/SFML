@@ -29,6 +29,7 @@
 #include <SFML/Window/EglContext.hpp>
 #include <SFML/Window/WindowImpl.hpp>
 #include <SFML/System/Err.hpp>
+#include <SFML/System/ThreadLocalPtr.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <SFML/System/Mutex.hpp>
 #include <SFML/System/Lock.hpp>
@@ -46,13 +47,19 @@
 
 namespace
 {
+
+#ifdef SFML_SYSTEM_WINDOWS
+    // Needed for angle
+    sf::ThreadLocalPtr<sf::priv::EglContext> currentContext(NULL);
+
     void LoadAngle() {
         void* handle = glad_egl_dlopen_handle();
         PFNEGLGETPROCADDRESSPROC getProc = (PFNEGLGETPROCADDRESSPROC)glad_dlsym_handle(handle, "eglGetProcAddress");
         LoadEGL(getProc);
         LoadGLES(getProc);
-        gladLoaderUnloadEGL();
     }
+
+#endif
 
     EGLDisplay getInitializedDisplay()
     {
@@ -70,20 +77,21 @@ namespace
 
         if (display == EGL_NO_DISPLAY)
         {
-#if defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
+#if defined(SFML_SYSTEM_WINDOWS)
             const EGLint EGL_PLATFORM_ANGLE_ANGLE = 0x3202;
             const EGLint EGL_PLATFORM_ANGLE_TYPE_ANGLE = 0x3203;
             const EGLint EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE = 0x3450;
+            const EGLint EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE = 0x3208;
             const EGLint EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE = 0x3209;
             const EGLint EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE = 0x320A;
             const EGLint EGL_PLATFORM_ANGLE_DEBUG_LAYERS_ENABLED = 0x3451;
 
-           const EGLint attribs[] = { EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE, EGL_NONE };
+            const EGLint attribs[] = { EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE, EGL_NONE };
             eglCheck(display = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY, attribs));
 
 #else
             eglCheck(display = eglGetDisplay(EGL_DEFAULT_DISPLAY));
-#endif // defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
+#endif // defined(SFML_SYSTEM_WINDOWS)
 
             eglCheck(eglInitialize(display, NULL, NULL));
         }
@@ -100,7 +108,7 @@ namespace
         {
             initialized = true;
 
-#if defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
+#if defined(SFML_SYSTEM_WINDOWS)
             // Load both EGL and GLES functions also because ANGLE allows it some stuff breaks if not 
             LoadAngle();
             getInitializedDisplay(); // Init default display too
@@ -112,7 +120,7 @@ namespace
 
             // Continue loading with a display
             gladLoaderLoadEGL(getInitializedDisplay());
-#endif // defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
+#endif //  defined(SFML_SYSTEM_WINDOWS)
            
         }
     }
@@ -208,15 +216,16 @@ EglContext::~EglContext()
     // Notify unshared OpenGL resources of context destruction
     cleanupUnsharedResources();
 
-    // Deactivate the current context
-    EGLContext currentContext = EGL_NO_CONTEXT;
-    eglCheck(currentContext = eglGetCurrentContext());
-
-    if (currentContext == m_context)
+    if (m_context)
     {
-        eglCheck(eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT));
+        if (currentContext == this)
+        {
+            if (eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT)== TRUE) {
+                currentContext = NULL;
+            }
+        }
     }
-
+    
     // Destroy context
     if (m_context != EGL_NO_CONTEXT)
     {
@@ -257,6 +266,8 @@ bool EglContext::makeCurrent(bool current)
         eglCheck(result = eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT));
     }
 
+    currentContext = (current ? this : NULL);
+
     return (result != EGL_FALSE);
 }
 
@@ -272,6 +283,7 @@ void EglContext::display()
 ////////////////////////////////////////////////////////////
 void EglContext::setVerticalSyncEnabled(bool enabled)
 {
+    ensureInit();
     eglCheck(eglSwapInterval(m_display, enabled ? 1 : 0));
 }
 

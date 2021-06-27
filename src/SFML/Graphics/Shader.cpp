@@ -551,6 +551,7 @@ void Shader::setUniform(const std::string& name, const Texture& texture)
         int location = getUniformLocation(name);
         if (location != -1)
         {
+						
             // Store the location -> texture mapping
             TextureTable::iterator it = m_textures.find(location);
             if (it == m_textures.end())
@@ -1211,7 +1212,7 @@ namespace sf
 
     //default Shaders
     auto vertexShader = R"vert(
-
+    #version 100
     precision mediump float;
     uniform mat4 u_TextureMatrix;
     uniform mat4 u_ModelViewMatrix;
@@ -1226,7 +1227,7 @@ namespace sf
     {
         gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(a_Vertex,0.0,1.0);
         v_Color = a_Color;
-        v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord,1.0,1.0)).xy;
+        v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord,0.0,1.0)).xy;
     }
     )vert";
     auto fragmentShader = R"frag(
@@ -1365,11 +1366,11 @@ namespace sf
 
         // Compile the shader program
         if (type == Vertex)
-            return compile(&shader[0], NULL, NULL);
+            return compile(&shader[0], NULL, fragmentShader);
         else if (type == Geometry)
             return compile(NULL, &shader[0], NULL);
         else
-            return compile(NULL, NULL, &shader[0]);
+            return compile(vertexShader, NULL, &shader[0]);
     }
 
 

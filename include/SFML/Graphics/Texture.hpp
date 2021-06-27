@@ -588,6 +588,7 @@ private:
     friend class Text;
     friend class RenderTexture;
     friend class RenderTarget;
+    friend class Shader;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get a valid image size according to hardware support

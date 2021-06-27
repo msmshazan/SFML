@@ -66,7 +66,6 @@ namespace
 
         return id++;
     }
-
     // Map to help us detect whether a different RenderTarget
     // has been activated within a single context
     typedef std::map<sf::Uint64, sf::Uint64> ContextRenderTargetMap;
@@ -300,8 +299,8 @@ void RenderTarget::draw(const Vertex* vertices, std::size_t vertexCount,
                 vertex.texCoords = vertices[i].texCoords;
             }
         }
-
-        setupDraw(useVertexCache, states);
+        RenderStates* States = (RenderStates *)&states;
+        setupDraw(useVertexCache, States);
 
         // Check if texture coordinates array is needed, and update client state accordingly
         bool enableTexCoordsArray = (states.texture || states.shader);
@@ -328,36 +327,48 @@ void RenderTarget::draw(const Vertex* vertices, std::size_t vertexCount,
 #ifdef SFML_OPENGL_ES
             if (states.shader != NULL) {
                 GLuint ShaderHandle = states.shader->getNativeHandle();
-                int vertLoc = 0;
-                int texLoc = 0;
-                int colLoc = 0;
-                glCheck(vertLoc = glGetAttribLocation(ShaderHandle, "a_Vertex"));
-                glCheck(colLoc = glGetAttribLocation(ShaderHandle, "a_Color"));
-                glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
-                glCheck(glVertexAttribPointer(vertLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 0));
-                glCheck(glVertexAttribPointer(colLoc, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), data + 8));
-                glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
-                glCheck(glEnableVertexAttribArray(vertLoc));
-                glCheck(glEnableVertexAttribArray(colLoc));
-                if (enableTexCoordsArray) {
-                    glCheck(glEnableVertexAttribArray(texLoc));
+                if (ShaderHandle != 0) {
+                    int vertLoc = 0;
+                    int texLoc = 0;
+                    int colLoc = 0;
+                    glCheck(vertLoc = glGetAttribLocation(ShaderHandle, "a_Vertex"));
+                    glCheck(colLoc = glGetAttribLocation(ShaderHandle, "a_Color"));
+                    glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
+                    if (vertLoc != -1) {
+                        glCheck(glVertexAttribPointer(vertLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 0));
+                        glCheck(glEnableVertexAttribArray(vertLoc));
+                    }
+                    if (colLoc != -1) {
+                        glCheck(glVertexAttribPointer(colLoc, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), data + 8));
+                        glCheck(glEnableVertexAttribArray(colLoc));
+                    }
+                    if (enableTexCoordsArray && texLoc != -1) {
+                        glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
+                        glCheck(glEnableVertexAttribArray(texLoc));
+                    }
                 }
             }
             else {
                 GLuint ShaderHandle = enableTexCoordsArray ? m_defaultShader.getNativeHandle() : m_defaultNoTexShader.getNativeHandle();
-                int vertLoc = 0;
-                int texLoc = 0;
-                int colLoc = 0;
-                glCheck(vertLoc = glGetAttribLocation(ShaderHandle, "a_Vertex"));
-                glCheck(colLoc = glGetAttribLocation(ShaderHandle, "a_Color"));
-                glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
-                glCheck(glVertexAttribPointer(vertLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 0));
-                glCheck(glVertexAttribPointer(colLoc, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), data + 8));
-                glCheck(glEnableVertexAttribArray(colLoc));
-                glCheck(glEnableVertexAttribArray(vertLoc));
-                if (enableTexCoordsArray) {
-                    glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
-                    glCheck(glEnableVertexAttribArray(texLoc));
+                if (ShaderHandle != 0) {
+                    int vertLoc = 0;
+                    int texLoc = 0;
+                    int colLoc = 0;
+                    glCheck(vertLoc = glGetAttribLocation(ShaderHandle, "a_Vertex"));
+                    glCheck(colLoc = glGetAttribLocation(ShaderHandle, "a_Color"));
+                    glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
+                    if (vertLoc != -1) {
+                        glCheck(glVertexAttribPointer(vertLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 0));
+                        glCheck(glEnableVertexAttribArray(vertLoc));
+                    }
+                    if (colLoc != -1) {
+                        glCheck(glVertexAttribPointer(colLoc, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), data + 8));
+                        glCheck(glEnableVertexAttribArray(colLoc));
+                    }
+                    if (enableTexCoordsArray && texLoc != -1) {
+                        glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
+                        glCheck(glEnableVertexAttribArray(texLoc));
+                    }
                 }
             }
 
@@ -377,17 +388,25 @@ void RenderTarget::draw(const Vertex* vertices, std::size_t vertexCount,
 #ifdef SFML_OPENGL_ES
             if (states.shader != NULL) {
                 GLuint ShaderHandle = states.shader->getNativeHandle();
-                int texLoc = 0;
-                glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
-                glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
-                glCheck(glEnableVertexAttribArray(texLoc));
+                if (ShaderHandle != 0) {
+                    int texLoc = 0;
+                    glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
+                    if (texLoc != -1) {
+                        glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
+                        glCheck(glEnableVertexAttribArray(texLoc));
+                    }
+                }
             }
             else {
-                GLuint ShaderHandle = enableTexCoordsArray ? m_defaultShader.getNativeHandle() : m_defaultNoTexShader.getNativeHandle();
-                int texLoc = 0;
-                glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
-                glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
-                glCheck(glEnableVertexAttribArray(texLoc));
+                GLuint ShaderHandle =  m_defaultShader.getNativeHandle();
+                if (ShaderHandle != 0) {
+                    int texLoc = 0;
+                    glCheck(texLoc = glGetAttribLocation(ShaderHandle, "a_TexCoord"));
+                    if (texLoc != -1) {
+                        glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), data + 12));
+                        glCheck(glEnableVertexAttribArray(texLoc));
+                    }
+                }
             }
 
 #else
@@ -448,7 +467,8 @@ void RenderTarget::draw(const VertexBuffer& vertexBuffer, std::size_t firstVerte
 
     if (isActive(m_id) || setActive(true))
     {
-        setupDraw(false, states);
+        RenderStates* States = (RenderStates*)&states;
+        setupDraw(false, States);
 
         // Bind vertex buffer
         VertexBuffer::bind(&vertexBuffer);
@@ -467,12 +487,18 @@ void RenderTarget::draw(const VertexBuffer& vertexBuffer, std::size_t firstVerte
         glCheck(vertLoc = glGetAttribLocation(states.shader->getNativeHandle(), "a_Vertex"));
         glCheck(colLoc = glGetAttribLocation(states.shader->getNativeHandle(), "a_Color"));
         glCheck(texLoc = glGetAttribLocation(states.shader->getNativeHandle(), "a_TexCoord"));
-        glCheck(glVertexAttribPointer(vertLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
-        glCheck(glVertexAttribPointer(colLoc, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)8));
-        glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)12));
-        glCheck(glEnableVertexAttribArray(vertLoc));
-        glCheck(glEnableVertexAttribArray(colLoc));
-        glCheck(glEnableVertexAttribArray(texLoc));
+        if (vertLoc != -1) {
+            glCheck(glVertexAttribPointer(vertLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
+            glCheck(glEnableVertexAttribArray(vertLoc));
+        }
+        if (colLoc != -1) {
+            glCheck(glVertexAttribPointer(colLoc, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)8));
+            glCheck(glEnableVertexAttribArray(colLoc));
+        }
+        if (texLoc != -1) {
+            glCheck(glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)12));
+            glCheck(glEnableVertexAttribArray(texLoc));
+        }
 #else
         glCheck(glVertexPointer(2, GL_FLOAT, sizeof(Vertex), reinterpret_cast<const void*>(0)));
         glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), reinterpret_cast<const void*>(8)));
@@ -579,7 +605,9 @@ void RenderTarget::popGLStates()
 {
     if (isActive(m_id) || setActive(true))
     {
-        #ifndef SFML_OPENGL_ES
+        #ifdef SFML_OPENGL_ES
+        m_view = m_defaultView;
+        #else
             glCheck(glMatrixMode(GL_PROJECTION));
             glCheck(glPopMatrix());
             glCheck(glMatrixMode(GL_MODELVIEW));
@@ -620,11 +648,7 @@ void RenderTarget::resetGLStates()
             glCheck(GLEXT_glActiveTexture(GLEXT_GL_TEXTURE0));
         }
 
-        // Define the default OpenGL states
-        glCheck(glDisable(GL_CULL_FACE));
-        glCheck(glDisable(GL_DEPTH_TEST));
-        glCheck(glEnable(GL_BLEND));
-#ifndef SFML_OPENGL_ES
+        #ifndef SFML_OPENGL_ES
         glCheck(glDisable(GL_LIGHTING));
         glCheck(glDisable(GL_ALPHA_TEST));
         glCheck(glMatrixMode(GL_MODELVIEW));
@@ -634,6 +658,10 @@ void RenderTarget::resetGLStates()
         glCheck(glEnableClientState(GL_COLOR_ARRAY));
         glCheck(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
 #endif // !SFML_OPENGL_ES
+        // Define the default OpenGL states
+        glCheck(glDisable(GL_CULL_FACE));
+        glCheck(glDisable(GL_DEPTH_TEST));
+        glCheck(glEnable(GL_BLEND));
         m_cache.glStatesSet = true;
 
         // Apply the default SFML states
@@ -644,7 +672,6 @@ void RenderTarget::resetGLStates()
 
         if (vertexBufferAvailable)
             glCheck(VertexBuffer::bind(NULL));
-
         m_cache.texCoordsArrayEnabled = true;
 
         m_cache.useVertexCache = false;
@@ -663,8 +690,7 @@ void RenderTarget::initialize()
     // Setup the default and current views
     m_defaultView.reset(FloatRect(0, 0, static_cast<float>(getSize().x), static_cast<float>(getSize().y)));
     m_view = m_defaultView;
-    {
-        auto vertexShader = R"vert(
+    auto vertexShader = R"vert(
 
     precision mediump float;
     uniform mat4 u_TextureMatrix;
@@ -680,9 +706,11 @@ void RenderTarget::initialize()
     {
         gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(a_Vertex,0.0,1.0);
         v_Color = a_Color;
-        v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord,1.0,1.0)).xy;
+        v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord,0.0,1.0)).xy;
     }
     )vert";
+    {
+        
         auto fragmentShader = R"frag(
     #version 100
     precision mediump float;
@@ -702,25 +730,7 @@ void RenderTarget::initialize()
     }
 
     {
-        auto vertexShader = R"vert(
-
-    precision mediump float;
-    uniform mat4 u_TextureMatrix;
-    uniform mat4 u_ModelViewMatrix;
-    uniform mat4 u_ProjectionMatrix;
-    //attribute vec2 a_TexCoord;
-    attribute vec2 a_Vertex;
-    attribute vec4 a_Color;
-    varying vec4 v_Color;
-    //varying vec2 v_TexCoord;
-
-    void main()
-    {
-        gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(a_Vertex,0.0,1.0);
-        v_Color = a_Color;
-        //v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord,1.0,1.0)).xy;
-    }
-    )vert";
+        
         auto fragmentShader = R"frag(
     #version 100
     precision mediump float;
@@ -858,8 +868,9 @@ void RenderTarget::applyShader( Shader* shader)
 
 
 ////////////////////////////////////////////////////////////
-void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
+void RenderTarget::setupDraw(bool useVertexCache, RenderStates* states)
 {
+    
     // Enable or disable sRGB encoding
     // This is needed for drivers that do not check the format of the surface drawn to before applying sRGB conversion
     if (!m_cache.enable)
@@ -875,21 +886,39 @@ void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
     }
 
     // First set the persistent OpenGL states if it's the very first call
-    if (!m_cache.glStatesSet)
+    if (!m_cache.glStatesSet) {
         resetGLStates();
-    // Apply the shader
-    if (states.shader) {
-        applyShader((sf::Shader*)states.shader);
+    }
+    else
+    {
+
+        if (GLEXT_multitexture)
+        {
+#ifndef SFML_OPENGL_ES
+            glCheck(GLEXT_glClientActiveTexture(GLEXT_GL_TEXTURE0));
+#endif // !SFML_OPENGL_ES
+            glCheck(GLEXT_glActiveTexture(GLEXT_GL_TEXTURE0));
+        }
+
+        m_cache.texCoordsArrayEnabled = true;
+
+        // Set the default view
+        setView(getView());
+    }
+    if (states->shader) {
+
     }
     else {
-        if (states.texture) {
-            applyShader(&m_defaultShader);
+        if (states->texture) {
+            states->shader = &m_defaultShader;
         }
         else
         {
-            applyShader(&m_defaultNoTexShader);
+            states->shader = &m_defaultNoTexShader;
         }
     }
+    // Apply the shader
+    applyShader((sf::Shader*)states->shader);
 
     if (useVertexCache)
     {
@@ -897,19 +926,8 @@ void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
         if (!m_cache.enable || !m_cache.useVertexCache) {
 #ifdef SFML_OPENGL_ES
             Glsl::Mat4 matrix = Glsl::Mat4(Transform::Identity.getMatrix());
-            if (states.shader) {
-                ((sf::Shader *)states.shader)->setUniform("u_ModelViewMatrix", matrix);
-            }
-            else
-            {
-                if (states.texture) {
-                    m_defaultShader.setUniform("u_ModelViewMatrix", matrix);
-                }
-                else
-                {
-                    m_defaultNoTexShader.setUniform("u_ModelViewMatrix", matrix);
-                }
-            }
+            ((sf::Shader *)states->shader)->setUniform("u_ModelViewMatrix", matrix);
+            
 #else
             glCheck(glLoadIdentity());
 #endif // SFML_OPENGL_ES
@@ -919,56 +937,34 @@ void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
     else
     {
 #ifdef SFML_OPENGL_ES
-        Glsl::Mat4 matrix = Glsl::Mat4(states.transform.getMatrix());
-        if (states.shader) {
-            ((sf::Shader*)states.shader)->setUniform("u_ModelViewMatrix", matrix);
-        }
-        else
-        {
-            if (states.texture)
-            {
-                m_defaultShader.setUniform("u_ModelViewMatrix", matrix);
-            }
-            else {
-                m_defaultNoTexShader.setUniform("u_ModelViewMatrix", matrix);
-            }
-        }
+        Glsl::Mat4 matrix = Glsl::Mat4(states->transform.getMatrix());
+        ((sf::Shader*)states->shader)->setUniform("u_ModelViewMatrix", matrix);
+        
 #else
-        applyTransform(states.transform);
+        applyTransform(states->transform);
 #endif // SFML_OPENGL_ES
     }
 
-#ifdef SFML_OPENGL_ES
-    Glsl::Mat4 matrix = Glsl::Mat4(m_view.getTransform().getMatrix());
-    if (states.shader) {
-        ((sf::Shader*)states.shader)->setUniform("u_ProjectionMatrix", matrix);
-    }
-    else
-    {
-        if (states.texture)
-        {
-            m_defaultShader.setUniform("u_ProjectionMatrix", matrix);
-        }
-        else {
-            m_defaultNoTexShader.setUniform("u_ProjectionMatrix", matrix);
-        }
-    }
-#else
 
     // Apply the view
     if (!m_cache.enable || m_cache.viewChanged) {
         applyCurrentView();
-    }
-       
-#endif // SFML_OPENGL_ES
 
-        
+#ifdef SFML_OPENGL_ES
+        Glsl::Mat4 matrix = Glsl::Mat4(m_view.getTransform().getMatrix());
+        ((sf::Shader*)states->shader)->setUniform("u_ProjectionMatrix", matrix);
+
+#else
+
+#endif // SFML_OPENGL_ES
+    }
+
     // Apply the blend mode
-    if (!m_cache.enable || (states.blendMode != m_cache.lastBlendMode))
-        applyBlendMode(states.blendMode);
+    if (!m_cache.enable || (states->blendMode != m_cache.lastBlendMode))
+        applyBlendMode(states->blendMode);
 
     // Apply the texture
-    if (!m_cache.enable || (states.texture && states.texture->m_fboAttachment))
+    if (!m_cache.enable || (states->texture && states->texture->m_fboAttachment))
     {
         // If the texture is an FBO attachment, always rebind it
         // in order to inform the OpenGL driver that we want changes
@@ -976,71 +972,55 @@ void RenderTarget::setupDraw(bool useVertexCache, const RenderStates& states)
         // This saves us from having to call glFlush() in
         // RenderTextureImplFBO which can be quite costly
         // See: https://www.khronos.org/opengl/wiki/Memory_Model
-        applyTexture(states.texture);
+        applyTexture(states->texture);
 
-        if (states.texture != NULL) {
+        if (states->texture != NULL) {
             GLfloat matrix[16] = { 1.f, 0.f, 0.f, 0.f,
                                       0.f, 1.f, 0.f, 0.f,
                                       0.f, 0.f, 1.f, 0.f,
                                       0.f, 0.f, 0.f, 1.f };
             // If non-normalized coordinates (= pixels) are requested, we need to
             // setup scale factors that convert the range [0 .. size] to [0 .. 1]
-            matrix[0] = 1.f / states.texture->m_actualSize.x;
-            matrix[5] = 1.f / states.texture->m_actualSize.y;
+            matrix[0] = 1.f / states->texture->m_actualSize.x;
+            matrix[5] = 1.f / states->texture->m_actualSize.y;
 
             // If pixels are flipped we must invert the Y axis
-            if (states.texture->m_pixelsFlipped)
+            if (states->texture->m_pixelsFlipped)
             {
                 matrix[5] = -matrix[5];
-                matrix[13] = static_cast<float>(states.texture->m_size.y) / states.texture->m_actualSize.y;
+                matrix[13] = static_cast<float>(states->texture->m_size.y) / states->texture->m_actualSize.y;
             }
 
-            if (states.shader) {
-                if (m_cache.lastTextureId != 0) {
-                    ((sf::Shader*)states.shader)->setUniform("u_Texture", 0);
-                    ((sf::Shader*)states.shader)->setUniform("u_TextureMatrix", Glsl::Mat4(matrix));
-                }
-            }
-            else
-            {
-                if (m_cache.lastTextureId != 0) {
-                    m_defaultShader.setUniform("u_Texture", 0);
-                    m_defaultShader.setUniform("u_TextureMatrix", Glsl::Mat4(matrix));
-                }
+            if (m_cache.lastTextureId != 0) {
+                ((sf::Shader*)states->shader)->setUniform("u_Texture", 0);
+                ((sf::Shader*)states->shader)->setUniform("u_TextureMatrix", Glsl::Mat4(matrix));
             }
         }
     }
     else
     {
-        Uint64 textureId = states.texture ? states.texture->m_cacheId : 0;
+        Uint64 textureId = states->texture ? states->texture->m_cacheId : 0;
         if (textureId != m_cache.lastTextureId) {
 
-            applyTexture(states.texture);
-            if (states.texture != NULL) {
+            applyTexture(states->texture);
+            if (states->texture != NULL) {
                 GLfloat matrix[16] = { 1.f, 0.f, 0.f, 0.f,
                                           0.f, 1.f, 0.f, 0.f,
                                           0.f, 0.f, 1.f, 0.f,
                                           0.f, 0.f, 0.f, 1.f };
                 // If non-normalized coordinates (= pixels) are requested, we need to
                 // setup scale factors that convert the range [0 .. size] to [0 .. 1]
-                matrix[0] = 1.f / states.texture->m_actualSize.x;
-                matrix[5] = 1.f / states.texture->m_actualSize.y;
+                matrix[0] = 1.f / states->texture->m_actualSize.x;
+                matrix[5] = 1.f / states->texture->m_actualSize.y;
 
                 // If pixels are flipped we must invert the Y axis
-                if (states.texture->m_pixelsFlipped)
+                if (states->texture->m_pixelsFlipped)
                 {
                     matrix[5] = -matrix[5];
-                    matrix[13] = static_cast<float>(states.texture->m_size.y) / states.texture->m_actualSize.y;
+                    matrix[13] = static_cast<float>(states->texture->m_size.y) / states->texture->m_actualSize.y;
                 }
-                if (states.shader) {
-                    ((sf::Shader*)states.shader)->setUniform("u_Texture", 0);
-                    ((sf::Shader*)states.shader)->setUniform("u_TextureMatrix", Glsl::Mat4(matrix));
-                }
-                else
-                {
-                    m_defaultShader.setUniform("u_Texture", 0);
-                    m_defaultShader.setUniform("u_TextureMatrix", Glsl::Mat4(matrix));
-                }
+                ((sf::Shader*)states->shader)->setUniform("u_Texture", 0);
+                ((sf::Shader*)states->shader)->setUniform("u_TextureMatrix", Glsl::Mat4(matrix));
             }
         }
     }

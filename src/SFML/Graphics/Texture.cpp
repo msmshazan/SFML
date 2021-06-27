@@ -25,6 +25,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/GLCheck.hpp>
@@ -34,9 +35,13 @@
 #include <SFML/System/Mutex.hpp>
 #include <SFML/System/Lock.hpp>
 #include <SFML/System/Err.hpp>
+#if defined(SFML_OPENGL_ES) && defined(SFML_SYSTEM_WINDOWS)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <glad/egl.h>
+#endif
 #include <cassert>
 #include <cstring>
-
 
 namespace
 {
@@ -48,6 +53,7 @@ namespace
     sf::Uint64 getUniqueId()
     {
         sf::Lock lock(idMutex);
+        
 
         static sf::Uint64 id = 1; // start at 1, zero is "no texture"
 
@@ -796,24 +802,34 @@ void Texture::bind(const Texture* texture, CoordinateType coordinateType)
     }
 }
 
-
 ////////////////////////////////////////////////////////////
 unsigned int Texture::getMaximumSize()
 {
-    Lock lock(maximumSizeMutex);
+   Lock lock(maximumSizeMutex);
 
     static bool checked = false;
     static GLint size = 0;
 
     if (!checked)
     {
+
         checked = true;
 
         TransientContextLock lock;
 
+#ifdef SFML_OPENGL_ES
+         {
+            HMODULE handle = LoadLibraryA("libEGL.dll");
+            PFNEGLGETPROCADDRESSPROC eglProc = (PFNEGLGETPROCADDRESSPROC)GetProcAddress(handle,"eglGetProcAddress");
+            if (glGetIntegerv == NULL) glGetIntegerv = (PFNGLGETINTEGERVPROC) eglProc("glGetIntegerv");
+            if (glGetError == NULL) glGetError = (PFNGLGETERRORPROC)eglProc("glGetError");
+            if (glGetString == NULL) glGetString = (PFNGLGETSTRINGPROC)eglProc("glGetString");
+            if (glGetStringi == NULL) glGetStringi = (PFNGLGETSTRINGIPROC)eglProc("glGetStringi");
+        }
+
+#endif // SFML_OPENGL_ES
         glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
     }
-
     return static_cast<unsigned int>(size);
 }
 

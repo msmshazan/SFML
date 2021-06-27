@@ -439,7 +439,7 @@ private:
     /// \param states         Render states to use for drawing
     ///
     ////////////////////////////////////////////////////////////
-    void setupDraw(bool useVertexCache, const RenderStates& states);
+    void setupDraw(bool useVertexCache, RenderStates* states);
 
     ////////////////////////////////////////////////////////////
     /// \brief Draw the primitives

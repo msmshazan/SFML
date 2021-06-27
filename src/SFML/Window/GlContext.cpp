@@ -47,7 +47,7 @@
 #if defined(SFML_SYSTEM_WINDOWS)
 
     #if defined(SFML_OPENGL_ES)
-
+        #include <SFML/Window/EglContext.hpp>
         typedef sf::priv::EglContext ContextType;
 
     #else
